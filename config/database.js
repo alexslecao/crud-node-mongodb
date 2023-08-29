@@ -8,9 +8,9 @@ module.exports = server => {
     const DB_USER = process.env.DB_USER;
     const DB_PASS = process.env.DB_PASS;
 
-    const urlConexao = `mongodb+srv://${DB_USER}:${DB_PASS}@bancoteste.qh5ajfu.mongodb.net/`;
+    const urlConection = `mongodb+srv://${DB_USER}:${DB_PASS}@bancoteste.qh5ajfu.mongodb.net/`;
 
-    mongoose.connect(urlConexao).then(() => {
+    mongoose.connect(urlConection).then(() => {
         console.log('Conexão executada com Sucesso!');
 
         //-entregar uma rota
