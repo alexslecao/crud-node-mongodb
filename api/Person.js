@@ -51,19 +51,37 @@ router.get('/', async (req, res) => {
 //-Detalhar
 router.get('/:id', async (req, res) => {
 
-    const id = req.params.id;
+    try {
+        const id = req.params.id;
 
-    let person = await Person.findOne({ _id: id });
-    res.status(200).json({ person: person ?? {} });
+        const person = await Person.findOne({ _id: id });
+
+        if (person)
+            res.status(200).json({ person: person });
+        else
+            res.status(422).json({ message: "Usuário não encontrado" });
+    }
+    catch (err) {
+        res.status(500).json({ message: "Erro ao buscar Usuário" });
+    }
 });
 
 //-Deletar
 router.delete('/:id', async (req, res) => {
 
-    const id = req.params.id;
+    try {
+        const id = req.params.id;
 
-    await Person.deleteOne({ _id: id });
-    res.status(200).json({ message: `Usuário de ID: "${id}" excluído com Sucesso` });
+        const deletedPerson = await Person.deleteOne({ _id: id });
+
+        if (deletedPerson.deletedCount === 1)
+            res.status(200).json({ message: `Usuário de ID: "${id}" excluído com Sucesso` });
+        else
+            res.status(422).json({ message: `Usuário de ID: "${id}" não encontrado` });
+    }
+    catch (err) {
+        res.status(500).json({ message: "Erro ao tentar excluir Usuário" });
+    }
 });
 
 //-Alterar
@@ -75,9 +93,11 @@ router.put('/:id', async (req, res) => {
         //- { name: "Alex", salary: 1200, approved: true }
         const { name, salary, approved } = req.body;
 
-        const _id = req.params.id;
-
-        const person = { _id, name, salary, approved };
+        const id = req.params.id;
+        
+        const person = { name, salary, approved };
+        
+        //console.log(person);
 
         if (!id || id.length <= 0) {
             hasError = true;
@@ -90,8 +110,13 @@ router.put('/:id', async (req, res) => {
         }
 
         if (!hasError) {
-            await Person.create(person);
-            res.status(201).json({ message: `Usuário de ID: "${Id}" alterado com Sucesso` });
+            const updatedPerson = await Person.updateOne({_id: id}, person);
+
+            if (updatedPerson.matchedCount === 1)
+                res.status(201).json({ message: `Usuário de ID: "${id}" alterado com Sucesso` });
+            else
+                res.status(201).json({ message: `Usuário de ID: "${id}" não encontrado` });
+
         }
         else {
             res.status(422).json({ message: validationMessage });
